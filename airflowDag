@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
-from datetime import datetime
+ort datetim
 
 with DAG(
     dag_id = "sales_data_pipeline",
