@@ -1,0 +1,35 @@
+from airflow import DAG
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
+from datetime import datetime
+
+with DAG(
+    dag_id = "sales_data_pipeline",
+    start_date = datetime(2026 , 5, 29),
+    schedule_interval = None,
+    catchup = False,
+) as dag:
+    create_table = BigQueryCreateEmptyTableOperator(
+        task_id = "create_table_using_gcs",
+        project_id = "interntask1-496809",
+        dataset_id = "sales_dataset",
+        table_id = "demo_customer_sales",
+        schema_fields = [
+            {"name": "customer_id", "type":"INTEGER","mode":"NULLABLE"},
+            {"name": "customer_name", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "city", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "amount", "type": "INTEGER", "mode": "NULLABLE"},
+        ],
+    )
+
+    load_data  = GCSToBigQueryOperator(
+        task_id = "load_data",
+        bucket = "balaram_sales_data",
+        source_object = ["cust_details.txt"],
+        destination_project_dataset_table = "interntask1-496809.sales_dataset.dummy_cust_sales",
+        skip_leading_rows = 1,
+        source_format = "csv",
+        write_disposition = "WRITE_TRUNCATE",
+    )
+
+    create_table >> load_data
